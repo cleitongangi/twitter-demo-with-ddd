@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  posterr.restapi:
+    image: ${DOCKER_REGISTRY-}posterrrestapi
+    build:
+      context: ../
+      dockerfile: src/Posterr.RestAPI/Dockerfile
+  sqldb:
+    image: sqldb
+    build:
+      context: .
+      dockerfile: SqlDbImage/Dockerfile      
+    environment:
+      SA_PASSWORD: "Strider@Posterr"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1452:1433"

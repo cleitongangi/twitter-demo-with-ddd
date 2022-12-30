@@ -1,0 +1,209 @@
+USE [master]
+GO
+/****** Object:  Database [Posterr]    Script Date: 26/05/2022 23:59:55 ******/
+CREATE DATABASE [Posterr]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'Posterr', FILENAME = N'/var/opt/mssql/data/Posterr.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'Posterr_log', FILENAME = N'/var/opt/mssql/data/Posterr_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT
+GO
+ALTER DATABASE [Posterr] SET COMPATIBILITY_LEVEL = 150
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [Posterr].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [Posterr] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [Posterr] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [Posterr] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [Posterr] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [Posterr] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [Posterr] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [Posterr] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [Posterr] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [Posterr] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [Posterr] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [Posterr] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [Posterr] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [Posterr] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [Posterr] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [Posterr] SET  ENABLE_BROKER 
+GO
+ALTER DATABASE [Posterr] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [Posterr] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [Posterr] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [Posterr] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [Posterr] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [Posterr] SET READ_COMMITTED_SNAPSHOT ON 
+GO
+ALTER DATABASE [Posterr] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [Posterr] SET RECOVERY FULL 
+GO
+ALTER DATABASE [Posterr] SET  MULTI_USER 
+GO
+ALTER DATABASE [Posterr] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [Posterr] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [Posterr] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [Posterr] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [Posterr] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [Posterr] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'Posterr', N'ON'
+GO
+ALTER DATABASE [Posterr] SET QUERY_STORE = OFF
+GO
+USE [Posterr]
+GO
+/****** Object:  FullTextCatalog [FullTextCatalog]    Script Date: 26/05/2022 23:59:55 ******/
+CREATE FULLTEXT CATALOG [FullTextCatalog] WITH ACCENT_SENSITIVITY = ON
+AS DEFAULT
+GO
+/****** Object:  Table [dbo].[Posts]    Script Date: 26/05/2022 23:59:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Posts](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Text] [nvarchar](777) NULL,
+	[CreatedAt] [datetime] NOT NULL,
+	[UserId] [bigint] NOT NULL,
+	[ParentId] [bigint] NULL,
+	[TypeId] [int] NOT NULL,
+ CONSTRAINT [PK_Posts] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[PostTypes]    Script Date: 26/05/2022 23:59:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[PostTypes](
+	[Id] [int] NOT NULL,
+	[TypeDescription] [varchar](6) NULL,
+ CONSTRAINT [PK_PostTypes] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UserFollowing]    Script Date: 26/05/2022 23:59:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserFollowing](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[UserId] [bigint] NOT NULL,
+	[TargetUserId] [bigint] NOT NULL,
+	[CreatedAt] [datetime2](7) NOT NULL,
+	[Active] [bit] NOT NULL,
+	[RemovedAt] [datetime2](7) NULL,
+ CONSTRAINT [PK_UserFollowing] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Users]    Script Date: 26/05/2022 23:59:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Users](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Username] [nvarchar](14) NOT NULL,
+	[JoinedAt] [datetime] NOT NULL,
+	[FollowersCount] [int] NOT NULL,
+	[FollowingCount] [int] NOT NULL,
+	[PostsCount] [int] NOT NULL,
+	[MetricsUpdatedAt] [datetime] NOT NULL,
+ CONSTRAINT [PK_Users] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Posts_ParentId]    Script Date: 26/05/2022 23:59:55 ******/
+CREATE NONCLUSTERED INDEX [IX_Posts_ParentId] ON [dbo].[Posts]
+(
+	[ParentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Posts_TypeId]    Script Date: 26/05/2022 23:59:55 ******/
+CREATE NONCLUSTERED INDEX [IX_Posts_TypeId] ON [dbo].[Posts]
+(
+	[TypeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_Posts_UserId]    Script Date: 26/05/2022 23:59:55 ******/
+CREATE NONCLUSTERED INDEX [IX_Posts_UserId] ON [dbo].[Posts]
+(
+	[UserId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Posts]  WITH CHECK ADD  CONSTRAINT [FK_Posts_PostParent] FOREIGN KEY([ParentId])
+REFERENCES [dbo].[Posts] ([Id])
+GO
+ALTER TABLE [dbo].[Posts] CHECK CONSTRAINT [FK_Posts_PostParent]
+GO
+ALTER TABLE [dbo].[Posts]  WITH CHECK ADD  CONSTRAINT [FK_Posts_PostTypes] FOREIGN KEY([TypeId])
+REFERENCES [dbo].[PostTypes] ([Id])
+GO
+ALTER TABLE [dbo].[Posts] CHECK CONSTRAINT [FK_Posts_PostTypes]
+GO
+ALTER TABLE [dbo].[Posts]  WITH CHECK ADD  CONSTRAINT [FK_Posts_Users] FOREIGN KEY([UserId])
+REFERENCES [dbo].[Users] ([Id])
+GO
+ALTER TABLE [dbo].[Posts] CHECK CONSTRAINT [FK_Posts_Users]
+GO
+USE [master]
+GO
+ALTER DATABASE [Posterr] SET  READ_WRITE 
+GO
+
+use [Posterr]
+-- insert data
+INSERT [dbo].[PostTypes] ([Id], [TypeDescription]) VALUES (1, N'Post')
+GO
+INSERT [dbo].[PostTypes] ([Id], [TypeDescription]) VALUES (2, N'Repost')
+GO
+INSERT [dbo].[PostTypes] ([Id], [TypeDescription]) VALUES (3, N'Quote')
+GO
+INSERT [dbo].[Users] ([Username], [JoinedAt], [FollowersCount], [FollowingCount], [PostsCount], [MetricsUpdatedAt]) VALUES (N'cleiton.gangi', getdate(), 0, 0, 0, getdate())
+GO
+INSERT [dbo].[Users] ([Username], [JoinedAt], [FollowersCount], [FollowingCount], [PostsCount], [MetricsUpdatedAt]) VALUES (N'user2', getdate(), 0, 0, 0, getdate())
+GO
+INSERT [dbo].[Users] ([Username], [JoinedAt], [FollowersCount], [FollowingCount], [PostsCount], [MetricsUpdatedAt]) VALUES (N'user3', getdate(), 0, 0, 0, getdate())
+GO
